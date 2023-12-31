@@ -28,12 +28,12 @@ def wait(seconds: int = 5) -> None:
 
 
 @decorators.set_unit("cm^3")
-def volume(radius, height):
+def volume(radius: float = 1.0, height: float = 1.0) -> float:
     return pi * height * (radius ** 2)
 
 
 @decorators.repeat(3)
-def greet(person):
+def greet(person: str = 'John') -> None:
     print(f'Greetings, {person}.')
 
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     '''
     # wait(10)
     '''
-    result = volume(3, 5) * ureg(volume.unit)
+    result = volume(2.0, 6.0) * ureg(volume.unit)
     print(result)
     print(result.to("cubic meters"))
     print(result.to("cubic decimeters").m)
