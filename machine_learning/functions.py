@@ -67,6 +67,7 @@ def synth_continuous(
     coefficient_limit: int = 5,
     polynomial_order: int = 2
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    
     x = np.linspace(start, end, num_examples)
 
     gaussian_noise = np.random.normal(0, noise_factor, num_examples)
@@ -107,6 +108,7 @@ def plot_history(
     save_path: bool = None,
     grid: bool = False
 ) -> None:
+    
     if not all(metric in history.history for metric in ['loss', 'val_loss', 'accuracy', 'val_accuracy']):
         raise ValueError(
             "Missing required metrics in the provided history object.")
