@@ -39,6 +39,7 @@ def synth_continuous(
     coefficient_limit: int = 5,
     polynomial_order: int = 2
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    
     x = np.linspace(start, end, num_examples)
 
     gaussian_noise = np.random.normal(0, noise_factor, num_examples)
@@ -61,7 +62,6 @@ def heatmap_confusion_matrix(
         datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")),
     save_file: bool = False,
     title: str = 'Confusion Matrix',
-
 ) -> None:
 
     cm = confusion_matrix(y_test, y_pred)
@@ -88,6 +88,7 @@ def preprocess_data(
     val_size: float = None,
     random_state: int = None
 ) -> Union[Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
+    
     scaler = StandardScaler()
     x_scaled = scaler.fit_transform(x.reshape(-1, 1))
 
@@ -108,6 +109,7 @@ def plot_history(
     save_path: bool = None,
     grid: bool = False
 ) -> None:
+    
     if not all(metric in history for metric in ['loss', 'val_loss', 'accuracy', 'val_accuracy']):
         raise ValueError(
             "Missing required metrics in the provided history object.")
