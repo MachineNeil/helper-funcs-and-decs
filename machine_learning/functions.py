@@ -28,30 +28,8 @@ def synth_categorical(
         new_class = np.random.uniform(
             0, number_of_classes, misclassified_examples)
         y_pred[wrong_indices] = new_class
+
         return y_test, y_pred
-
-
-def synth_continuous(
-    start: float = -10.0,
-    end: float = 10.0,
-    num_examples: int = 100,
-    noise_factor: float = 0.10,
-    coefficient_limit: int = 5,
-    polynomial_order: int = 2
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    
-    x = np.linspace(start, end, num_examples)
-
-    gaussian_noise = np.random.normal(0, noise_factor, num_examples)
-    coefficients = np.random.uniform(-coefficient_limit,
-                                     coefficient_limit, polynomial_order + 1)
-
-    y_true = np.polyval(coefficients, x)
-
-    scaling_factor = 10 ** polynomial_order
-    y_noisy = y_true + (gaussian_noise * scaling_factor)
-
-    return x, y_true, y_noisy
 
 
 def heatmap_confusion_matrix(
@@ -81,26 +59,46 @@ def heatmap_confusion_matrix(
     plt.show()
 
 
+def synth_continuous(
+    start: float = -10.0,
+    end: float = 10.0,
+    num_examples: int = 100,
+    noise_factor: float = 0.10,
+    coefficient_limit: int = 5,
+    polynomial_order: int = 2
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    x = np.linspace(start, end, num_examples)
+
+    gaussian_noise = np.random.normal(0, noise_factor, num_examples)
+    coefficients = np.random.uniform(-coefficient_limit,
+                                     coefficient_limit, polynomial_order + 1)
+
+    y_true = np.polyval(coefficients, x)
+
+    scaling_factor = 10 ** polynomial_order
+    y_noisy = y_true + (gaussian_noise * scaling_factor)
+
+    return x, y_true, y_noisy
+
+
 def preprocess_data(
     x: np.ndarray,
     y: np.ndarray,
     test_size: float = 0.10,
     val_size: float = None,
     random_state: int = None
-) -> Union[Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
-    
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+
     scaler = StandardScaler()
     x_scaled = scaler.fit_transform(x.reshape(-1, 1))
 
     x_train, x_test, y_train, y_test = train_test_split(
         x_scaled, y, test_size=test_size, random_state=random_state)
 
-    if val_size:
-        x_train, x_val, y_train, y_val = train_test_split(
-            x_train, y_train, test_size=val_size / (1 - test_size), random_state=random_state)
-        return x_train, x_test, x_val, y_train, y_test, y_val
-    else:
-        return x_train, x_test, y_train, y_test
+    x_train, x_val, y_train, y_val = train_test_split(
+        x_train, y_train, test_size=val_size / (1 - test_size), random_state=random_state)
+
+    return x_train, x_test, x_val, y_train, y_test, y_val
 
 
 def plot_history(
@@ -109,16 +107,15 @@ def plot_history(
     save_path: bool = None,
     grid: bool = False
 ) -> None:
-    
-    if not all(metric in history for metric in ['loss', 'val_loss', 'accuracy', 'val_accuracy']):
+    if not all(metric in history.history for metric in ['loss', 'val_loss', 'accuracy', 'val_accuracy']):
         raise ValueError(
             "Missing required metrics in the provided history object.")
 
-    epochs = range(len(history['loss']))
+    epochs = range(len(history.history['loss']))
 
     plt.figure(figsize=(12, 6))
-    plt.plot(epochs, history['loss'], label='training_loss')
-    plt.plot(epochs, history['val_loss'], label='val_loss')
+    plt.plot(epochs, history.history['loss'], label='training_loss')
+    plt.plot(epochs, history.history['val_loss'], label='val_loss')
     plt.title(f'{title} - Loss')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
@@ -132,8 +129,8 @@ def plot_history(
     plt.show()
 
     plt.figure(figsize=(12, 6))
-    plt.plot(epochs, history['accuracy'], label='training_accuracy')
-    plt.plot(epochs, history['val_accuracy'], label='val_accuracy')
+    plt.plot(epochs, history.history['accuracy'], label='training_accuracy')
+    plt.plot(epochs, history.history['val_accuracy'], label='val_accuracy')
     plt.title(f'{title} - Accuracy')
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
@@ -150,26 +147,24 @@ def plot_history(
 def evaluate_model(
     y_true: Union[List[int], np.ndarray],
     y_pred: Union[List[int], np.ndarray],
-    class_labels: Optional[List[str]] = None,
-    plot_roc_curve: bool = False
+    class_labels: Optional[List[str]] = None
 ) -> None:
 
     report = classification_report(y_true, y_pred, target_names=class_labels)
     print(f'Classification report:\n{report}')
 
-    if plot_roc_curve:
-        if len(np.unique(y_true)) > 2:
-            raise ValueError(
-                "ROC curve is only applicable for binary classification.")
-        fpr, tpr, _ = roc_curve(y_true, y_pred)
-        roc_auc = auc(fpr, tpr)
+    if len(np.unique(y_true)) > 2:
+        raise ValueError(
+            "ROC curve is only applicable for binary classification.")
+    fpr, tpr, _ = roc_curve(y_true, y_pred)
+    roc_auc = auc(fpr, tpr)
 
-        plt.figure(figsize=(8, 6))
-        plt.plot(fpr, tpr, color='red', lw=2,
-                 label=f'ROC curve (AUC = {roc_auc:.2f})')
-        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-        plt.xlabel('False + rate')
-        plt.ylabel('True + rate')
-        plt.title('Receiver Operating Characteristic (ROC) Curve')
-        plt.legend(loc='lower right')
-        plt.show()
+    plt.figure(figsize=(8, 6))
+    plt.plot(fpr, tpr, color='red', lw=2,
+             label=f'ROC curve (AUC = {roc_auc:.2f})')
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.xlabel('False + rate')
+    plt.ylabel('True + rate')
+    plt.title('Receiver Operating Characteristic (ROC) Curve')
+    plt.legend(loc='lower right')
+    plt.show()
