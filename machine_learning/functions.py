@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score
 import datetime
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-import subroutines as sub
+import nlp_subroutines as sub
 
 def synth_categorical(
     number_of_classes: int = 2,
