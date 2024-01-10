@@ -1,7 +1,7 @@
 from typing import Optional, List, Union
 from sklearn.metrics import classification_report, roc_curve, auc
 import numpy as np
-from typing import Tuple, Union, Literal
+from typing import Tuple, Union, Literal, Any
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score
 import datetime
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-
+import subroutines as sub
 
 def synth_categorical(
     number_of_classes: int = 2,
@@ -170,3 +170,119 @@ def evaluate_model(
     plt.title('Receiver Operating Characteristic (ROC) Curve')
     plt.legend(loc='lower right')
     plt.show()
+
+
+def preprocess_nlp(
+    text: str,
+    language: str = 'english',
+    case: str = None,
+    rm_numbers: bool = False,
+    number_replacement: str = '<NUM>',
+    rm_punctuation: bool = False,
+    punctuation: str = None,
+    special_punctuation: str = None,
+    rm_special_characters: bool = False,
+    special_characters: str = '',
+    rm_nonalpha: bool = False,
+    rm_nonalphanum: bool = False,
+    rm_stopwords: bool = False,
+    stopwords: bool = None,
+    special_stopwords: str = None,
+    rm_email: bool = False,
+    email_replacement: str = '<MAIL>',
+    rm_phone: bool = False,
+    phone_replacement: str = '<TELN>',
+    rm_html: bool = False,
+    normalize_nonascii: bool = False,
+    rm_nonascii: bool = False,
+    nonascii_replacement: str = '<NAII>',
+    rm_url: bool = False,
+    url_replacement: str = '<URL>',
+    expand_contractions: bool = False,
+    rm_escape_characters: bool = False,
+    escape_character_replacement: str = '<ESC>',
+    lemmatize: bool = False,
+    lemmatizer: Any = None,
+    stemming: bool = False,
+    stemmer: Any = None,
+    rm_short_words: bool = False,
+    minimum_word_length: int = 3,
+    rm_image_references: bool = False,
+    image_reference_replacement: str = '<IMG>',
+    rm_duplicate_whitespaces: bool = False,
+    rm_lists: bool = False,
+    list_replacement: str = '<LIST>',
+    rm_emojis: bool = False,
+    emoji_replacement: str = '<EMOJ>',
+    rm_names: bool = False,
+    name_replacement: str = '<NAME>',
+):
+
+    if rm_html:
+        text = sub.remove_html(text)
+
+    if case is not None:
+        text = sub.set_case(text, case)
+
+    if rm_url:
+        text = sub.remove_url(text, url_replacement)
+
+    if rm_email:
+        text = sub.remove_email(text, email_replacement)
+
+    if rm_phone:
+        text = sub.remove_phone(text, phone_replacement)
+
+    if rm_image_references:
+        text = sub.remove_images(text, image_reference_replacement)
+
+    if rm_lists:
+        text = sub.remove_lists(text, list_replacement)
+
+    if rm_emojis:
+        text = sub.remove_emojis(text, emoji_replacement)
+
+    if rm_names:
+        text = sub.remove_names(text, name_replacement)
+
+    if expand_contractions:
+        text = sub.expand_contractions(text)
+
+    if rm_escape_characters:
+        text = sub.remove_escape_characters(text, escape_character_replacement)
+
+    if rm_nonalpha:
+        text = sub.remove_non_alpha(text, rm_nonalphanum)
+
+    if rm_numbers:
+        text = sub.remove_numbers(text, number_replacement)
+
+    if rm_special_characters:
+        text = sub.remove_special_characters(text, special_characters)
+
+    if rm_punctuation:
+        text = sub.remove_punctuation(text, punctuation, special_punctuation)
+
+    if rm_duplicate_whitespaces:
+        text = sub.remove_duplicate_whitespaces(text)
+
+    if normalize_nonascii:
+        text = sub.normalize_nonascii(text)
+
+    if rm_nonascii:
+        text = sub.remove_nonascii(text, nonascii_replacement)
+
+    if rm_stopwords:
+        text = sub.remove_stopwords(
+            text, language, stopwords, special_stopwords)
+
+    if rm_short_words:
+        text = sub.remove_short_words(text, minimum_word_length)
+
+    if lemmatize:
+        text = sub.lemmatize(text, lemmatizer)
+
+    if stemming:
+        text = sub.stemming(text, stemmer)
+
+    return text
