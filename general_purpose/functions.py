@@ -1,7 +1,7 @@
 from random import sample
 from string import ascii_lowercase, ascii_uppercase, digits, punctuation
 from collections import Counter, OrderedDict
-from typing import Dict, Any, Iterable, List
+from typing import Dict, Any, Iterable, List, Callable
 import heapq
 
 
@@ -48,13 +48,13 @@ def generate_password(length: int = 16) -> str:
 
 
 class TaskScheduler:
-    def __init__(self):
+    def __init__(self) -> None:
         self._task_queue = []
 
-    def schedule(self, task, priority):
+    def schedule(self, task: Callable, priority: int) -> None:
         heapq.heappush(self._task_queue, (priority, task))
 
-    def execute_tasks(self):
+    def execute_tasks(self) -> None:
         while self._task_queue:
             priority, task = heapq.heappop(self._task_queue)
             task()
