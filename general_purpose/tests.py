@@ -36,9 +36,11 @@ def volume(radius: float = 1.0, height: float = 1.0) -> float:
 def greet(person: str = 'John') -> None:
     print(f'Greetings, {person}.')
 
+
 @decorators.val_args(str)
 def state(text: str) -> None:
     print(text)
+
 
 if __name__ == '__main__':
     # loop(50000)
