@@ -1,4 +1,5 @@
 import functions
+from time import sleep
 
 '''
 dict1 = {'a': 1, 'b': 2}
