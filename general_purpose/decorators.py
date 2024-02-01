@@ -3,7 +3,7 @@ import functools
 import datetime
 import threading
 import tracemalloc
-from typing import Callable
+from typing import Callable, Type, Tuple, Any
 # from functools import lru_cache
 
 
@@ -109,5 +109,22 @@ def repeat(times: int = 3):
         def wrapper(*args, **kwargs):
             for _ in range(times):
                 function(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+def val_args(*arg_types: Type, **kwarg_types: Type) -> Callable:
+    def decorator(function: Callable) -> Callable:
+        @functools.wraps(function)
+        def wrapper(*args: Tuple, **kwargs: dict) -> Any:
+            for arg, arg_type in zip(args, arg_types):
+                if not isinstance(arg, arg_type):
+                    raise TypeError(
+                        f"Expected {arg_type} for {arg}, but got {type(arg)}.")
+            for kwarg, kwarg_type in kwarg_types.items():
+                if kwarg in kwargs and not isinstance(kwargs[kwarg], kwarg_type):
+                    raise TypeError(
+                        f"Expected {kwarg_type} for {kwarg}, but got {type(kwargs[kwarg])}.")
+            return function(*args, **kwargs)
         return wrapper
     return decorator
