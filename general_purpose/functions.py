@@ -2,6 +2,7 @@ from random import sample
 from string import ascii_lowercase, ascii_uppercase, digits, punctuation
 from collections import Counter, OrderedDict
 from typing import Dict, Any, Iterable, List
+import heapq
 
 
 def merge_dictionaries(*dicts: Dict[str, Any]) -> Dict[str, Any]:
@@ -44,3 +45,17 @@ def is_sorted(_list: List[Any]) -> bool:
 def generate_password(length: int = 16) -> str:
     characters = ascii_lowercase + ascii_uppercase + digits + punctuation
     return ''.join(sample(characters, length))
+
+
+class TaskScheduler:
+    def __init__(self):
+        self._task_queue = []
+
+    def schedule(self, task, priority):
+        heapq.heappush(self._task_queue, (priority, task))
+
+    def execute_tasks(self):
+        while self._task_queue:
+            priority, task = heapq.heappop(self._task_queue)
+            task()
+            print(f"Executing task: {task.__name__} with priority {priority}.")
